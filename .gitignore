@@ -141,3 +141,9 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# dsh-neev-sandbox build + secrets
+lib/
+.env
+neev.env
+*.log

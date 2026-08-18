@@ -29,10 +29,6 @@ NEEV_API_KEY=... NEEV_ORG_ID=... NEEV_PROJECT_ID=... \
 Your agent's `pwd`, `id`, files it writes, servers it starts — all live in the
 sandbox, not on your laptop.
 
-<p align="center">
-  <img src="assets/demo.svg" alt="A real quickstart run: a command and a file both executing inside one NeevSandbox" width="100%">
-</p>
-
 ## Why
 
 DeepSeek Harness is built on **capability seams**: swappable interfaces that

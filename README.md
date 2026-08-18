@@ -14,7 +14,7 @@
 
 Give your DeepSeek Harness agent a **clean, disposable Linux box** for every run.
 This bundle relocates the Harness's shell work — **Bash, PTY, and LSP** — into a
-short-lived [NeevSandbox](https://neevcloud.com) micro-VM. Nothing runs on your
+short-lived, gVisor-isolated [NeevSandbox](https://neevcloud.com). Nothing runs on your
 machine, and there's **nothing to fork**: drop the bundle into any `dsh`
 install and the stock tools keep working, now executing remotely.
 
@@ -43,10 +43,9 @@ agent's execution world is a remote sandbox.
 
 ## How it works
 
-```
-DeepSeek Harness ──ctx.subprocess──▶ @neevcloud/dsh-sandbox ──@neevcloud/sdk──▶ NeevSandbox
-  Bash · PTY · LSP                   runtime + providers                        remote micro-VM
-```
+<p align="center">
+  <img src="assets/how-it-works.svg" alt="The same agent, but its code runs inside an isolated gVisor sandbox instead of on your machine" width="100%">
+</p>
 
 Two Cordis services, shipped as one bundle:
 
@@ -62,7 +61,7 @@ delegate straight through. `dsh plugin add` applies it for you.
 ## Use cases
 
 - **Run untrusted or AI-generated code** off your machine — the blast radius is
-  a disposable micro-VM that's deleted when the run ends.
+  a disposable gVisor sandbox that's deleted when the run ends.
 - **A fresh box per task.** Every `dsh` run gets its own clean Linux
   environment; no leftover state, no "works on my laptop."
 - **Fan out agents in parallel**, each isolated in its own sandbox, without them

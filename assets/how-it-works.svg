@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 470" width="1200" height="470" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" role="img" aria-label="The same DeepSeek Harness agent, but its code runs inside an isolated gVisor sandbox instead of on your machine">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1110"/><stop offset="1" stop-color="#080a09"/>
+    </linearGradient>
+    <linearGradient id="t2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f2f7f5"/><stop offset="1" stop-color="#34d399"/>
+    </linearGradient>
+    <linearGradient id="risk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b1d26"/><stop offset="1" stop-color="#2a1420"/>
+    </linearGradient>
+    <linearGradient id="safe" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c2b28"/><stop offset="1" stop-color="#0a1f24"/>
+    </linearGradient>
+    <linearGradient id="flow2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f87171"/><stop offset="1" stop-color="#2dd4bf"/>
+    </linearGradient>
+    <filter id="sh2" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="470" rx="24" fill="url(#bg2)"/>
+  <rect x="0.5" y="0.5" width="1199" height="469" rx="24" fill="none" stroke="#1b2420"/>
+  <text x="600" y="66" text-anchor="middle" font-size="30" font-weight="800" fill="url(#t2)">The same agent — a safer place to run its code</text>
+  <text x="600" y="98" text-anchor="middle" font-size="16" fill="#94a3b8">Add one bundle. Every command your agent runs moves off your machine.</text>
+
+  <!-- LEFT: default dsh (risk) -->
+  <g filter="url(#sh2)">
+    <rect x="64" y="126" width="470" height="292" rx="18" fill="url(#risk)" stroke="#7f1d1d"/>
+  </g>
+  <text x="96" y="166" font-size="18" font-weight="700" fill="#fecaca">Default dsh</text>
+  <text x="96" y="190" font-size="14" fill="#fca5a5">the agent executes on your host</text>
+  <!-- laptop icon -->
+  <g transform="translate(96,214)" stroke="#fca5a5" stroke-width="2" fill="none">
+    <rect x="0" y="0" width="86" height="54" rx="6" fill="#2a1420"/>
+    <path d="M-12 68 L98 68 L86 54 L0 54 Z" fill="#2a1420"/>
+    <text x="43" y="34" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="15" fill="#f87171" stroke="none">$_</text>
+  </g>
+  <g font-size="14.5" fill="#fed7d7">
+    <text x="208" y="238">• Bash, files, and processes run</text>
+    <text x="220" y="260">on your laptop</text>
+    <text x="208" y="290">• untrusted / AI-written code has</text>
+    <text x="220" y="312">your machine as its blast radius</text>
+    <text x="208" y="342">• leftover state between runs</text>
+  </g>
+  <rect x="96" y="366" width="300" height="30" rx="15" fill="#7f1d1d"/>
+  <text x="112" y="386" font-size="13.5" fill="#fecaca">⚠  your machine is the blast radius</text>
+
+  <!-- connector -->
+  <g>
+    <text x="600" y="250" text-anchor="middle" font-size="13" font-weight="700" fill="#e2e8f0">one line</text>
+    <rect x="548" y="262" width="104" height="30" rx="15" fill="#1b2740" stroke="#334463"/>
+    <text x="600" y="282" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="12.5" fill="#a5b4fc">dsh plugin add</text>
+    <line x1="534" y1="277" x2="560" y2="277" stroke="url(#flow2)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="640" y1="277" x2="672" y2="277" stroke="url(#flow2)" stroke-width="4" stroke-linecap="round" stroke-dasharray="9 10">
+      <animate attributeName="stroke-dashoffset" values="19;0" dur="0.9s" repeatCount="indefinite"/>
+    </line>
+    <polygon points="672,271 684,277 672,283" fill="#2dd4bf"/>
+  </g>
+
+  <!-- RIGHT: with the bundle (safe) -->
+  <g filter="url(#sh2)">
+    <rect x="666" y="126" width="470" height="292" rx="18" fill="url(#safe)" stroke="#115e59"/>
+  </g>
+  <text x="698" y="166" font-size="18" font-weight="700" fill="#99f6e4">with @neevcloud/dsh-sandbox</text>
+  <text x="698" y="190" font-size="14" fill="#5eead4">the same tools, executed remotely</text>
+  <!-- sandbox shield icon -->
+  <g transform="translate(700,206)">
+    <path d="M40 4 C40 4 74 14 74 14 C74 46 60 68 40 78 C20 68 6 46 6 14 C6 14 40 4 40 4 Z" fill="#052e2b" stroke="#5eead4" stroke-width="2"/>
+    <path d="M26 40 L36 50 L56 28" fill="none" stroke="#34d399" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <animate attributeName="opacity" values="0.85;1;0.85" dur="2.6s" repeatCount="indefinite"/>
+  </g>
+  <g font-size="14.5" fill="#c7f9ee">
+    <text x="800" y="238">• Bash, PTY, and LSP run inside</text>
+    <text x="812" y="260">an isolated gVisor sandbox</text>
+    <text x="800" y="290">• your laptop never touches the code</text>
+    <text x="800" y="342">• fresh box per run, deleted after</text>
+  </g>
+  <rect x="698" y="366" width="330" height="30" rx="15" fill="#115e59"/>
+  <text x="714" y="386" font-size="13.5" fill="#a7f3d0">✓  isolated · disposable · nothing to fork</text>
+
+  <text x="600" y="446" text-anchor="middle" font-size="13.5" fill="#64748b">Swap one provider (ctx.subprocess) and Bash, PTY, and LSP all move together — the tools are unchanged.</text>
+</svg>

@@ -167,6 +167,30 @@ config, so restate what you need):
 - [`@neevcloud/sdk`](https://www.npmjs.com/package/@neevcloud/sdk) — the JavaScript SDK the providers use
 - [DeepSeek Harness capability seams](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/capability-seams.md) — the `ctx.subprocess` / `ctx.fs` model this plugs into
 
+## FAQ
+
+**Does it change my Harness tools?** No. The stock Bash, terminal, and LSP
+tools are untouched — the plugin only swaps the providers they delegate to
+(`ctx.subprocess` and `ctx.fs`), so everything relocates at once.
+
+**How is the sandbox isolated?** Each sandbox is a gVisor (`runsc`) environment
+— a user-space kernel that mediates syscalls, giving container-like ergonomics
+with a stronger boundary than a shared-kernel container.
+
+**Do files and Bash share state?** Yes. They run in the same sandbox, so a file
+the agent writes with its file tools is visible to Bash, and vice versa.
+
+**Does my API key reach the sandbox?** No. `NEEV_API_KEY` is read host-side by
+the SDK only; it is never passed into the sandbox, and credential-shaped
+environment names are stripped from anything forwarded to a process.
+
+**Is the sandbox persistent?** Not in this release — it's created on profile
+boot and deleted when `dsh` exits. Reconnect, pause/resume, and snapshots are on
+the roadmap.
+
+**Which model does it use?** Any model provider DeepSeek Harness is configured
+with; the plugin only provides the execution world, not the model.
+
 ## Develop
 
 ```sh

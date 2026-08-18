@@ -79,6 +79,10 @@ fields you need (a patch replaces the complete config):
   PTY create API does not accept a per-session cwd or environment.
 - **Interactive stdin** is available through the terminal (PTY); ordinary
   managed processes accept startup stdin only.
+- **Environment unsets are not propagated.** Only explicit environment entries
+  are forwarded (and credential-shaped / `NEEV_*` names are always dropped). The
+  sandbox keeps its own base environment; a caller cannot unset a base-image
+  variable through the spawn environment.
 
 ## Develop
 

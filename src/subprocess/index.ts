@@ -18,24 +18,18 @@ import { NeevSubprocessHandle } from './process.ts'
 import { spawnNeevTerminal } from './terminal.ts'
 import { SHELL_NAME } from './remote.ts'
 
-/** Configuration for the Neev subprocess adapter. */
-export interface Config {
-  /** Status/liveness poll cadence in milliseconds. */
-  pollMs?: number
-}
+/** Configuration for the Neev subprocess adapter (currently none). */
+export interface Config {}
 
 /** Neev process manager registered as `ctx.subprocess`. */
 export class NeevSubprocessRuntime extends TrackedSubprocessRuntime {
   static inject = ['neev']
 
-  static Config: z<Config> = z.object({ pollMs: z.number().default(20) })
+  static Config: z<Config> = z.object({})
 
-  private readonly pollMs: number
-
-  /** Wire config and disposal policy. */
-  constructor(ctx: Context, config: Config) {
+  /** Wire disposal policy. */
+  constructor(ctx: Context) {
     super(ctx, 'neev subprocess teardown')
-    this.pollMs = (config as { pollMs: number }).pollMs
   }
 
   /** Resolve one executable in the sandbox: verify absolute, look up bare names. */
@@ -73,13 +67,13 @@ export class NeevSubprocessRuntime extends TrackedSubprocessRuntime {
     this.guardSpawn(spec)
     // spawn() is synchronous per the seam; the handle resolves the sandbox
     // inside its own run() before starting the process.
-    return this.adoptHandle(new NeevSubprocessHandle(this.ctx.neev, spec, this.pollMs))
+    return this.adoptHandle(new NeevSubprocessHandle(this.ctx.neev, spec))
   }
 
   /** Allocate a PTY-backed terminal session in the sandbox. */
   async spawnTerminal(spec: SubprocessTerminalSpawnSpec): Promise<SubprocessTerminalHandle> {
     this.guardSpawn(spec)
-    return spawnNeevTerminal(this.ctx.neev, spec)
+    return this.adoptTerminal(await spawnNeevTerminal(this.ctx.neev, spec))
   }
 }
 

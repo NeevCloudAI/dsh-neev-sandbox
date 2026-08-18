@@ -13,17 +13,22 @@ import type { CreateSandboxParams, Sandbox, SandboxWebSocket } from '@neevcloud/
 
 export type { Sandbox } from '@neevcloud/sdk'
 
-/** Configuration for the shared NeevSandbox owner. */
+/** Default template when neither templateId nor image is configured. */
+const DEFAULT_TEMPLATE_ID = 'sb-ubuntu-26-04-dev'
+
+/**
+ * Configuration for the shared NeevSandbox owner. The API key is intentionally
+ * NOT a config field: it is read only from NEEV_API_KEY so a secret can never
+ * be placed in a committed profile patch.
+ */
 export interface Config {
-  /** API key; omission reads NEEV_API_KEY. Never forwarded into the sandbox. */
-  apiKey?: string
   /** Org id; omission reads NEEV_ORG_ID. */
   orgId?: string
   /** Project id; omission reads NEEV_PROJECT_ID. */
   projectId?: string
   /** Sandbox template id; the server resolves the image and default command. */
   templateId?: string
-  /** Optional explicit image, used when templateId is omitted (mutually exclusive). */
+  /** Explicit image; takes precedence over templateId (mutually exclusive). */
   image?: string
   /** Absolute working directory; when omitted it is discovered via `pwd`. */
   cwd?: string
@@ -41,10 +46,9 @@ declare module '@deepseek-ai/cordis' {
  */
 export class NeevRuntime extends Service {
   static Config: z<Config> = z.object({
-    apiKey: z.string(),
     orgId: z.string(),
     projectId: z.string(),
-    templateId: z.string().default('sb-ubuntu-26-04-dev'),
+    templateId: z.string(),
     image: z.string(),
     cwd: z.string(),
   })
@@ -63,11 +67,11 @@ export class NeevRuntime extends Service {
   constructor(ctx: Context, config: Config) {
     super(ctx, 'neev')
     this.config = config
-    // baseURL is intentionally not a config field: customers always target
-    // production (the SDK's default). The SDK still honors NEEV_BASE_URL from
-    // the environment, which internal testing uses to point at other planes.
+    // The API key is read from NEEV_API_KEY by the SDK; it is never taken from
+    // config. baseURL is likewise not a config field — customers target
+    // production (the SDK default), and the SDK honors NEEV_BASE_URL from the
+    // environment for internal testing against other planes.
     this.client = new Neev({
-      apiKey: config.apiKey ?? process.env.NEEV_API_KEY,
       orgId: config.orgId ?? process.env.NEEV_ORG_ID,
       projectId: config.projectId ?? process.env.NEEV_PROJECT_ID,
       // The runtime's global WebSocket cannot send the bearer auth header, so
@@ -94,9 +98,12 @@ export class NeevRuntime extends Service {
 
   /** Create the sandbox, wait until Ready, and resolve the absolute workspace root. */
   private async open(): Promise<Sandbox> {
-    const create: CreateSandboxParams = this.config.templateId !== undefined
-      ? { sandbox_template_id: this.config.templateId }
-      : { image: this.config.image ?? '' }
+    // An explicit image wins; otherwise use the configured template, falling
+    // back to the default. templateId carries no schema default, so an
+    // image-only config genuinely reaches the image branch.
+    const create: CreateSandboxParams = this.config.image !== undefined && this.config.image !== ''
+      ? { image: this.config.image }
+      : { sandbox_template_id: this.config.templateId ?? DEFAULT_TEMPLATE_ID }
     const sandbox = await this.client.sandboxes.create(create)
     try {
       await sandbox.waitUntilReady()

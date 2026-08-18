@@ -1,16 +1,22 @@
 import { Context } from '@deepseek-ai/cordis'
 import { MAX_TIMER_DELAY_MS } from '@deepseek-ai/dsh-timeout'
 import { SubprocessRuntime } from '@deepseek-ai/dsh-subprocess'
-import type { SubprocessSpawnSpec, SubprocessTerminalSpawnSpec } from '@deepseek-ai/dsh-subprocess'
+import type {
+  SubprocessSpawnSpec,
+  SubprocessTerminalHandle,
+  SubprocessTerminalSpawnSpec,
+} from '@deepseek-ai/dsh-subprocess'
 import type { NeevSubprocessHandle } from './process.ts'
 import { asError } from './remote.ts'
 
 /**
- * Base that tracks live handles for disposal and validates the spec invariants
- * shared by every spawn path. Concrete providers implement the seam methods.
+ * Base that tracks live processes and terminals for disposal and validates the
+ * spec invariants shared by every spawn path. Concrete providers implement the
+ * seam methods.
  */
 export abstract class TrackedSubprocessRuntime extends SubprocessRuntime {
   protected readonly live = new Set<NeevSubprocessHandle>()
+  protected readonly terminals = new Set<SubprocessTerminalHandle>()
   protected disposing = false
 
   /** Bind the disposal effect that terminates and joins every live handle. */
@@ -18,12 +24,21 @@ export abstract class TrackedSubprocessRuntime extends SubprocessRuntime {
     super(ctx)
     ctx.effect(() => async () => {
       this.disposing = true
-      const pending = [...this.live].map(async (handle) => {
+      const pending: Promise<unknown>[] = []
+      for (const handle of this.live) {
         handle.terminate()
-        await handle.waitForExit()
-        await handle.done.catch(() => undefined)
-        this.live.delete(handle)
-      })
+        pending.push((async () => {
+          await handle.waitForExit()
+          await handle.done.catch(() => undefined)
+          this.live.delete(handle)
+        })())
+      }
+      for (const terminal of this.terminals) {
+        pending.push((async () => {
+          await terminal.terminate()
+          this.terminals.delete(terminal)
+        })())
+      }
       const outcomes = await Promise.allSettled(pending)
       const failures = outcomes.flatMap<unknown>(o => o.status === 'rejected' ? [o.reason] : [])
       if (failures.length === 1) throw asError(failures[0])
@@ -31,10 +46,17 @@ export abstract class TrackedSubprocessRuntime extends SubprocessRuntime {
     }, this.teardownLabel)
   }
 
-  /** Retain a handle for disposal and drop it once it settles. */
+  /** Retain a process handle for disposal and drop it once it settles. */
   protected adoptHandle(handle: NeevSubprocessHandle): NeevSubprocessHandle {
     this.live.add(handle)
     void handle.done.catch(() => undefined).finally(() => this.live.delete(handle))
+    return handle
+  }
+
+  /** Retain a terminal handle for disposal and drop it once it settles. */
+  protected adoptTerminal(handle: SubprocessTerminalHandle): SubprocessTerminalHandle {
+    this.terminals.add(handle)
+    void handle.done.catch(() => undefined).finally(() => this.terminals.delete(handle))
     return handle
   }
 

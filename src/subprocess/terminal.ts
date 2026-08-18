@@ -29,11 +29,17 @@ export async function spawnNeevTerminal(
     rows: spec.rows,
     onData: chunk => output.write(decoder.decode(chunk, { stream: true })),
   })
-  // Resolve exit facts when the PTY closes and end the output stream.
-  const done = pty.wait().then((result) => {
+  // Flush any trailing multibyte sequence, then end the output stream. Runs on
+  // both a clean exit and a transport failure so a reader never hangs on EOF.
+  const finish = (): void => {
+    const trailing = decoder.decode()
+    if (trailing !== '') output.write(trailing)
     output.end()
-    return { exitCode: result.exitCode, signal: null }
-  })
+  }
+  const done = pty.wait().then(
+    (result) => { finish(); return { exitCode: result.exitCode, signal: null } },
+    (error: unknown) => { finish(); throw error },
+  )
 
   return {
     pid: -1,

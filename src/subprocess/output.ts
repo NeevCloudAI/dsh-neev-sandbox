@@ -1,9 +1,13 @@
 import type { SubprocessOutputRead, SubprocessOutputReader } from '@deepseek-ai/dsh-subprocess'
 
 /**
- * Bounded in-memory tail for one collected stream with whole-stream byte
- * offsets. Overflow drops from the head; a read starting before the retained
- * window is reported lossy. This POC keeps no spill file.
+ * Bounded in-memory tail for one collected stream with whole-stream offsets.
+ * Overflow drops from the head; a read starting before the retained window is
+ * reported lossy. This POC keeps no spill file.
+ *
+ * Note: the cap and offsets are counted in UTF-16 code units, not bytes, so the
+ * memory bound is approximate for non-ASCII and head-eviction can split a
+ * surrogate pair. Offsets are self-consistent, so read/resume stay correct.
  */
 export class BoundedOutput implements SubprocessOutputReader {
   private buffer = ''

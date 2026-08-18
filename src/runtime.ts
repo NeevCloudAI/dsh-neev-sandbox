@@ -7,8 +7,9 @@
 import { posix } from 'node:path'
 import { Context, Service } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
+import { WebSocket } from 'ws'
 import { Neev } from '@neevcloud/sdk'
-import type { CreateSandboxParams, Sandbox } from '@neevcloud/sdk'
+import type { CreateSandboxParams, Sandbox, SandboxWebSocket } from '@neevcloud/sdk'
 
 export type { Sandbox } from '@neevcloud/sdk'
 
@@ -69,6 +70,9 @@ export class NeevRuntime extends Service {
       apiKey: config.apiKey ?? process.env.NEEV_API_KEY,
       orgId: config.orgId ?? process.env.NEEV_ORG_ID,
       projectId: config.projectId ?? process.env.NEEV_PROJECT_ID,
+      // The runtime's global WebSocket cannot send the bearer auth header, so
+      // supply a `ws`-backed factory for interactive PTY sessions in Node.
+      webSocket: (url, opts) => new WebSocket(url, opts) as unknown as SandboxWebSocket,
     })
     this.ready = this.open()
     // Keep an eager-creation failure observed; getSandbox() still surfaces it.

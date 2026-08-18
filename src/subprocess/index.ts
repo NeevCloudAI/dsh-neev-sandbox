@@ -15,6 +15,7 @@ import type {
 } from '@deepseek-ai/dsh-subprocess'
 import { TrackedSubprocessRuntime } from './provider.ts'
 import { NeevSubprocessHandle } from './process.ts'
+import { spawnNeevTerminal } from './terminal.ts'
 import { SHELL_NAME } from './remote.ts'
 
 /** Configuration for the Neev subprocess adapter. */
@@ -75,9 +76,10 @@ export class NeevSubprocessRuntime extends TrackedSubprocessRuntime {
     return this.adoptHandle(new NeevSubprocessHandle(this.ctx.neev, spec, this.pollMs))
   }
 
-  /** Terminal support arrives in a later slice. */
-  async spawnTerminal(_spec: SubprocessTerminalSpawnSpec): Promise<SubprocessTerminalHandle> {
-    throw new Error('subprocess-neev: spawnTerminal not implemented yet')
+  /** Allocate a PTY-backed terminal session in the sandbox. */
+  async spawnTerminal(spec: SubprocessTerminalSpawnSpec): Promise<SubprocessTerminalHandle> {
+    this.guardSpawn(spec)
+    return spawnNeevTerminal(this.ctx.neev, spec)
   }
 }
 

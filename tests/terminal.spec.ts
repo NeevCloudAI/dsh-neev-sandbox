@@ -2,7 +2,7 @@ import { Context } from '@deepseek-ai/cordis'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import NeevRuntime from '../src/runtime.ts'
 import NeevSubprocessRuntime from '../src/subprocess/index.ts'
-import { LIVE } from './helpers.ts'
+import { LIVE, TEST_TEMPLATE_ID } from './helpers.ts'
 
 describe.skipIf(!LIVE)('Neev PTY', () => {
   let ctx: Context
@@ -10,7 +10,7 @@ describe.skipIf(!LIVE)('Neev PTY', () => {
 
   beforeAll(async () => {
     ctx = new Context()
-    const rt = await ctx.plugin(NeevRuntime, { templateId: 'sb-ubuntu-26-04-dev' })
+    const rt = await ctx.plugin(NeevRuntime, { templateId: TEST_TEMPLATE_ID })
     const sub = await ctx.plugin(NeevSubprocessRuntime, {})
     await ctx.neev.getSandbox()
     dispose = async () => { await sub.dispose(); await rt.dispose() }

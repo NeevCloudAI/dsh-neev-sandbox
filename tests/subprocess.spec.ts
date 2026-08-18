@@ -2,7 +2,7 @@ import { Context } from '@deepseek-ai/cordis'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import NeevRuntime from '../src/runtime.ts'
 import NeevSubprocessRuntime from '../src/subprocess/index.ts'
-import { LIVE } from './helpers.ts'
+import { LIVE, TEST_TEMPLATE_ID } from './helpers.ts'
 
 describe.skipIf(!LIVE)('NeevSubprocessRuntime', () => {
   let ctx: Context
@@ -10,7 +10,7 @@ describe.skipIf(!LIVE)('NeevSubprocessRuntime', () => {
 
   beforeAll(async () => {
     ctx = new Context()
-    const runtimeFiber = await ctx.plugin(NeevRuntime, { templateId: 'sb-ubuntu-26-04-dev' })
+    const runtimeFiber = await ctx.plugin(NeevRuntime, { templateId: TEST_TEMPLATE_ID })
     const subFiber = await ctx.plugin(NeevSubprocessRuntime, {})
     await ctx.neev.getSandbox()
     dispose = async () => { await subFiber.dispose(); await runtimeFiber.dispose() }

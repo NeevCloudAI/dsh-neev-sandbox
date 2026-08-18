@@ -14,7 +14,7 @@ import type { CreateSandboxParams, Sandbox, SandboxWebSocket } from '@neevcloud/
 export type { Sandbox } from '@neevcloud/sdk'
 
 /** Default template when neither templateId nor image is configured. */
-const DEFAULT_TEMPLATE_ID = 'sb-ubuntu-26-04-dev'
+const DEFAULT_TEMPLATE_ID = 'sb-ubuntu-26-04-minimal'
 
 /**
  * Configuration for the shared NeevSandbox owner. The API key is intentionally

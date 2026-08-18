@@ -43,6 +43,6 @@
     - id: neev-runtime
       name: '@neevcloud/dsh-sandbox/runtime'
       config:
-        templateId: sb-ubuntu-26-04-dev
+        templateId: sb-ubuntu-26-04-minimal
     - id: neev-subprocess
       name: '@neevcloud/dsh-sandbox/subprocess'

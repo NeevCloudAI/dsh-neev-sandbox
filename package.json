@@ -27,9 +27,20 @@
   },
   "files": [
     "lib/",
+    "assets/",
     "cordis.patch.yml",
     "README.md",
     "LICENSE"
+  ],
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "dsh",
+    "sandbox",
+    "microvm",
+    "ai-agents",
+    "code-execution",
+    "neevcloud"
   ],
   "dsh": {
     "bundle": {

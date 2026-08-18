@@ -1,12 +1,12 @@
 import { Context } from '@deepseek-ai/cordis'
 import { describe, expect, it } from 'vitest'
 import NeevRuntime from '../src/runtime.ts'
-import { LIVE, neevFromEnv } from './helpers.ts'
+import { LIVE, TEST_TEMPLATE_ID, neevFromEnv } from './helpers.ts'
 
 describe.skipIf(!LIVE)('NeevRuntime lifecycle', () => {
   it('creates a sandbox, exposes an absolute cwd, and deletes it on disposal', async () => {
     const ctx = new Context()
-    const fiber = await ctx.plugin(NeevRuntime, { templateId: 'sb-ubuntu-26-04-dev' })
+    const fiber = await ctx.plugin(NeevRuntime, { templateId: TEST_TEMPLATE_ID })
     const sandbox = await ctx.neev.getSandbox()
     const id = sandbox.id
     expect(id).toBeTruthy()

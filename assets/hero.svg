@@ -68,7 +68,7 @@
     <!-- sandbox -->
     <rect x="968" y="250" width="172" height="150" rx="16" fill="url(#box)"/>
     <text x="1054" y="300" text-anchor="middle" fill="#ecfdf5" font-size="20" font-weight="700">NeevSandbox</text>
-    <text x="1054" y="330" text-anchor="middle" fill="#99f6e4" font-size="14">remote microVM</text>
+    <text x="1054" y="330" text-anchor="middle" fill="#99f6e4" font-size="14">gVisor sandbox</text>
     <text x="1054" y="360" text-anchor="middle" fill="#5eead4" font-size="13">your code runs here</text>
   </g>
 

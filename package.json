@@ -37,7 +37,7 @@
     "deepseek-harness",
     "dsh",
     "sandbox",
-    "microvm",
+    "gvisor",
     "ai-agents",
     "code-execution",
     "neevcloud"

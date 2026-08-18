@@ -1,18 +1,20 @@
-# Relocate subprocess execution (Bash, PTY, LSP) into one shared NeevSandbox.
-#
-# This POC provides only the subprocess seam, so the filesystem stays host-side:
-# the file tools and Bash observe different worlds until a Neev filesystem
-# provider lands. Do not disable the host fs provider here — that would leave
-# DSH with no filesystem.
+# Relocate the whole execution world — files, Bash, PTY, and LSP — into one
+# shared NeevSandbox. The file tools and Bash then observe the same working
+# tree: a file Bash writes is visible to the fs tools and vice versa.
 
 # Turn off the local subprocess provider so ours takes ctx.subprocess.
 - id: subprocess
   name: '@deepseek-ai/dsh-subprocess-local'
   disabled: true
 
-# Processes are already isolated by the sandbox; advertise full access within
-# that remote boundary so the sandbox-aware Bash executor delegates straight to
-# the Neev subprocess provider while staying compatible with permission presets.
+# Turn off the host filesystem provider so ours takes ctx.fs.
+- id: fs-sandbox
+  name: '@deepseek-ai/dsh-fs-sandbox'
+  disabled: true
+
+# Files and processes are already isolated by the sandbox; advertise full access
+# within that remote boundary so the sandbox-aware Bash executor delegates
+# straight to the Neev providers while staying compatible with permission presets.
 - id: sandbox-policy
   name: '@deepseek-ai/dsh-sandbox-policy'
   config:
@@ -46,3 +48,5 @@
         templateId: sb-ubuntu-26-04-minimal
     - id: neev-subprocess
       name: '@neevcloud/dsh-sandbox/subprocess'
+    - id: neev-filesystem
+      name: '@neevcloud/dsh-sandbox/filesystem'

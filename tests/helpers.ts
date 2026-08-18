@@ -1,7 +1,7 @@
 import { Neev } from '@neevcloud/sdk'
 
-/** True only when credentials are present; live specs skip otherwise. */
-export const LIVE = Boolean(process.env.NEEV_API_KEY)
+/** True only when the full credential set is present; live specs skip otherwise. */
+export const LIVE = Boolean(process.env.NEEV_API_KEY && process.env.NEEV_ORG_ID && process.env.NEEV_PROJECT_ID)
 
 /** Template the live specs provision; override per plane via NEEV_TEST_TEMPLATE_ID. */
 export const TEST_TEMPLATE_ID = process.env.NEEV_TEST_TEMPLATE_ID ?? 'sb-ubuntu-26-04-minimal'

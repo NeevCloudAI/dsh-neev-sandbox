@@ -7,7 +7,7 @@
   <img alt="Node" src="https://img.shields.io/badge/node-%E2%89%A522-3c873a">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-ESM-3178c6">
   <img alt="DeepSeek Harness" src="https://img.shields.io/badge/DeepSeek%20Harness-0.1.0--rc.7%2B-7c3aed">
-  <img alt="License" src="https://img.shields.io/badge/license-MIT-0d9488">
+  <img alt="License" src="https://img.shields.io/badge/license-Apache%202.0-0d9488">
 </p>
 
 # @neevcloud/dsh-sandbox
@@ -169,4 +169,4 @@ default-export their service class.
 
 ## License
 
-MIT
+Apache 2.0 — see [LICENSE](LICENSE).

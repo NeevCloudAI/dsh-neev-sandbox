@@ -70,7 +70,7 @@ export class NeevRuntime extends Service {
     // The API key is read from NEEV_API_KEY by the SDK; it is never taken from
     // config. baseURL is likewise not a config field — customers target
     // production (the SDK default), and the SDK honors NEEV_BASE_URL from the
-    // environment for internal testing against other planes.
+    // environment for testing against other environments.
     this.client = new Neev({
       orgId: config.orgId ?? process.env.NEEV_ORG_ID,
       projectId: config.projectId ?? process.env.NEEV_PROJECT_ID,

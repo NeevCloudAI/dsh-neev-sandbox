@@ -1,9 +1,20 @@
 {
   "name": "@neevcloud/dsh-sandbox",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "NeevSandbox execution providers for DeepSeek Harness",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NeevCloudAI/dsh-neev-sandbox.git"
+  },
+  "homepage": "https://github.com/NeevCloudAI/dsh-neev-sandbox#readme",
+  "bugs": {
+    "url": "https://github.com/NeevCloudAI/dsh-neev-sandbox/issues"
+  },
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
   },

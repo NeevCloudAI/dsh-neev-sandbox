@@ -2,7 +2,7 @@
   "name": "@neevcloud/dsh-sandbox",
   "version": "0.1.0",
   "description": "NeevSandbox execution providers for DeepSeek Harness",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "publishConfig": {
     "access": "public"

@@ -88,6 +88,10 @@ export NEEV_ORG_ID=...       # organization id
 export NEEV_PROJECT_ID=...   # project id
 ```
 
+New to NeevCloud? Create an API key and find your organization and project ids
+by following [Retrieve organization and project IDs](https://docs.ai.neevcloud.com/tutorials/create-your-first-sandbox-in-neevcloud-agentic-studio-javascript-sdk#step-3-retrieve-organization-and-project-ids)
+in the Agentic Studio quickstart.
+
 Then run a task:
 
 ```sh

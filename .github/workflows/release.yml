@@ -32,8 +32,9 @@ jobs:
       # Gate the release on the same checks CI runs (lint, typecheck, unit
       # tests, build). Live tests skip without NEEV_* secrets.
       - run: npm run check
-      # publishConfig already sets public access; prepack builds the tarball.
-      # Add --provenance here once the repository is public.
-      - run: npm publish
+      # publishConfig sets public access; prepack builds the tarball.
+      # --provenance attaches a signed build attestation via GitHub OIDC
+      # (works now that the repository is public; needs id-token: write above).
+      - run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

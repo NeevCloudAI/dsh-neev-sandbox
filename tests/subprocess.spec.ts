@@ -45,4 +45,20 @@ describe.skipIf(!LIVE)('NeevSubprocessRuntime', () => {
     })
     expect((await handle.done).exitCode).toBe(7)
   })
+
+  it('terminates a long-running process', async () => {
+    const handle = ctx.subprocess.spawn({
+      argv: ['bash', '-c', 'sleep 600'],
+      cwd: ctx.neev.cwd,
+      stdio: { stdin: 'ignore', stdout: 'inherit', stderr: 'inherit' },
+      graceMs: 500,
+    })
+    // Let the process register in the supervisor, then terminate and await exit.
+    await new Promise(r => setTimeout(r, 1500))
+    handle.terminate()
+    expect(await handle.waitForExit()).toBe(true)
+    const sandbox = await ctx.neev.getSandbox()
+    const running = (await sandbox.processes.list()).filter(p => p.state === 'running')
+    expect(running.some(p => p.args?.includes('sleep 600'))).toBe(false)
+  })
 })

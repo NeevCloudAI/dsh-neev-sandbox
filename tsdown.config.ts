@@ -2,7 +2,7 @@ import { defineConfig } from 'tsdown'
 
 // Two Loader entry points; each default-exports one Cordis Service class.
 export default defineConfig({
-  entry: ['src/runtime.ts', 'src/subprocess/index.ts'],
+  entry: ['src/runtime.ts', 'src/subprocess/index.ts', 'src/filesystem/index.ts'],
   format: 'esm',
   dts: true,
   outDir: 'lib',

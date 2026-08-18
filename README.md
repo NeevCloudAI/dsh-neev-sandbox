@@ -13,9 +13,10 @@
 # @neevcloud/dsh-sandbox
 
 Give your DeepSeek Harness agent a **clean, disposable Linux box** for every run.
-This bundle relocates the Harness's shell work — **Bash, PTY, and LSP** — into a
-short-lived, gVisor-isolated [NeevSandbox](https://neevcloud.com). Nothing runs on your
-machine, and there's **nothing to fork**: drop the bundle into any `dsh`
+This bundle relocates the Harness's execution world — **files, Bash, PTY, and
+LSP** — into a short-lived, gVisor-isolated [NeevSandbox](https://neevcloud.com).
+Files the agent writes and commands it runs share one sandbox, nothing runs on
+your machine, and there's **nothing to fork**: drop the bundle into any `dsh`
 install and the stock tools keep working, now executing remotely.
 
 ```sh
@@ -47,12 +48,13 @@ agent's execution world is a remote sandbox.
   <img src="assets/how-it-works.svg" alt="The same agent, but its code runs inside an isolated gVisor sandbox instead of on your machine" width="100%">
 </p>
 
-Two Cordis services, shipped as one bundle:
+Three Cordis services, shipped as one bundle:
 
 | Entry point | Registers | Role |
 |---|---|---|
 | `@neevcloud/dsh-sandbox/runtime` | `ctx.neev` | Owns one sandbox: create → ready → delete on exit |
 | `@neevcloud/dsh-sandbox/subprocess` | `ctx.subprocess` | Runs processes and PTYs in that sandbox |
+| `@neevcloud/dsh-sandbox/filesystem` | `ctx.fs` | Reads, writes, edits, and lists files in that sandbox |
 
 A shipped `cordis.patch.yml` wires them in: it disables the local subprocess
 provider, inserts the two Neev rows, and sets the sandbox-aware Bash executor to
@@ -140,9 +142,12 @@ config, so restate what you need):
 
 ## Scope and limitations
 
-- **Subprocess seam only (for now).** This release provides `ctx.subprocess`
-  (Bash, PTY, LSP). The filesystem stays host-side, so the file tools and Bash
-  observe different working trees until a Neev filesystem provider lands.
+- **File versions are metadata-derived.** The SDK exposes no native version
+  token, so the freshness token guarding `writeText`/`editText` is a hash of the
+  file's mtime, size, and mode. Guards work; there is a small non-atomic window
+  between the version check and the write.
+- **Writes are atomic via temp + rename**, and paths resolve without symlink
+  canonicalization (`realpath`) in this release.
 - **Interactive stdin** flows through the terminal (PTY); ordinary managed
   processes take startup stdin only.
 - **Environment:** only your explicit entries are forwarded; credential-shaped

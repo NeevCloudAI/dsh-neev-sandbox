@@ -3,9 +3,9 @@
 </p>
 
 <p align="center">
-  <a href="#install"><img alt="install: dsh plugin add" src="https://img.shields.io/badge/install-dsh%20plugin%20add-4f46e5"></a>
+  <a href="https://www.npmjs.com/package/@neevcloud/dsh-sandbox"><img alt="npm version" src="https://img.shields.io/npm/v/@neevcloud/dsh-sandbox?color=4f46e5"></a>
+  <a href="https://www.npmjs.com/package/@neevcloud/dsh-sandbox"><img alt="npm downloads" src="https://img.shields.io/npm/dm/@neevcloud/dsh-sandbox?color=0d9488"></a>
   <img alt="Node" src="https://img.shields.io/badge/node-%E2%89%A522-3c873a">
-  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-ESM-3178c6">
   <img alt="DeepSeek Harness" src="https://img.shields.io/badge/DeepSeek%20Harness-0.1.0--rc.7%2B-7c3aed">
   <img alt="License" src="https://img.shields.io/badge/license-Apache%202.0-0d9488">
 </p>
@@ -178,6 +178,15 @@ npm pack
 Live tests exercise a real sandbox and skip automatically unless `NEEV_API_KEY`
 (with `NEEV_ORG_ID` / `NEEV_PROJECT_ID`) is set. Both Loader entry points
 default-export their service class.
+
+For a self-contained taste of the providers without `dsh` or a model, run
+[`examples/quickstart.mjs`](examples/quickstart.mjs) — it runs a command in the
+sandbox, writes a file with `ctx.fs`, and reads it back with Bash:
+
+```sh
+npm install && npm run build
+NEEV_API_KEY=... NEEV_ORG_ID=... NEEV_PROJECT_ID=... node examples/quickstart.mjs
+```
 
 ## License
 

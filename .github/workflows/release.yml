@@ -1,0 +1,39 @@
+# Release — deliberately manual, mirroring the SDK convention. Nothing publishes
+# on a push to main. A publish to the public npm registry happens only when a
+# version tag is pushed (or this workflow is dispatched by hand) and requires the
+# NPM_TOKEN repository secret.
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write # for npm provenance (only takes effect once the repo is public)
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+      # Gate the release on the same checks CI runs (lint, typecheck, unit
+      # tests, build). Live tests skip without NEEV_* secrets.
+      - run: npm run check
+      # publishConfig already sets public access; prepack builds the tarball.
+      # Add --provenance here once the repository is public.
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -147,3 +147,7 @@ lib/
 .env
 neev.env
 *.log
+
+# local diagnostic scratch (not shipped)
+/_*.mjs
+/social-preview.png

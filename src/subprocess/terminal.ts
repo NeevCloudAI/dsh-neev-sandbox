@@ -19,19 +19,25 @@ export async function spawnNeevTerminal(
   spec: SubprocessTerminalSpawnSpec,
 ): Promise<SubprocessTerminalHandle> {
   const sandbox = await neev.getSandbox()
+  // Keep the sandbox awake for the life of the PTY so an idle pause cannot
+  // freeze an interactive session; released when the terminal exits.
+  const release = neev.hold()
   const output = new PassThrough()
   const decoder = new TextDecoder()
   const [program, ...args] = spec.argv
+  // Release the hold if allocation fails, so a failed PTY create doesn't wedge
+  // the active count and permanently disable idle auto-pause.
   const pty = await sandbox.pty.create({
     program,
     args,
     cols: spec.cols,
     rows: spec.rows,
     onData: chunk => output.write(decoder.decode(chunk, { stream: true })),
-  })
+  }).catch((error: unknown) => { release(); throw error })
   // Flush any trailing multibyte sequence, then end the output stream. Runs on
   // both a clean exit and a transport failure so a reader never hangs on EOF.
   const finish = (): void => {
+    release()
     const trailing = decoder.decode()
     if (trailing !== '') output.write(trailing)
     output.end()

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0
+
+- Persistent sandbox (opt-in). A new `persist` config reuses one sandbox across
+  runs — reconnected by name, paused instead of deleted on exit — so its files
+  survive; `idleTimeoutMs` auto-pauses an idle sandbox and resumes it lazily on
+  the next operation. Default behavior is unchanged (fully ephemeral).
+- The subprocess and terminal providers hold the sandbox awake for the life of a
+  live process or PTY, so an idle auto-pause can never freeze work in flight.
+- Resume waits for the data plane to be routable before use, avoiding a transient
+  post-resume connect error.
+
 ## 0.1.1
 
 - Docs: live npm badges, a runnable `examples/quickstart.mjs`, an FAQ, and a

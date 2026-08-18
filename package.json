@@ -1,0 +1,100 @@
+{
+  "name": "@neevcloud/dsh-sandbox",
+  "version": "0.0.0",
+  "description": "NeevSandbox execution providers for DeepSeek Harness",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "main": "./lib/runtime.js",
+  "types": "./lib/runtime.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/runtime.d.ts",
+      "default": "./lib/runtime.js"
+    },
+    "./runtime": {
+      "types": "./lib/runtime.d.ts",
+      "default": "./lib/runtime.js"
+    },
+    "./subprocess": {
+      "types": "./lib/subprocess/index.d.ts",
+      "default": "./lib/subprocess/index.js"
+    },
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/",
+    "assets/",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "dsh",
+    "sandbox",
+    "microvm",
+    "ai-agents",
+    "code-execution",
+    "neevcloud"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "lint": "oxlint src tests",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "prepack": "tsdown"
+  },
+  "dependencies": {
+    "@neevcloud/sdk": "0.7.0-beta",
+    "ws": "^8.21.3"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "4.0.1",
+    "@deepseek-ai/dsh-subprocess": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-timeout": "0.1.0-rc.7",
+    "@deepseek-ai/schemastery": "3.18.1"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-subprocess": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-timeout": {
+      "optional": true
+    },
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.1",
+    "@deepseek-ai/dsh-agent": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-sandbox-policy": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-session": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-subprocess": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-terminal": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-terminal-bash": "0.1.0-rc.7",
+    "@deepseek-ai/dsh-timeout": "0.1.0-rc.7",
+    "@deepseek-ai/schemastery": "3.18.1",
+    "@types/node": "^22.20.0",
+    "@types/ws": "^8.18.1",
+    "oxlint": "^1.76.0",
+    "publint": "^0.3.21",
+    "tsdown": "^0.22.2",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}

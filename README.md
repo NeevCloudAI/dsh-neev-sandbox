@@ -88,6 +88,10 @@ export NEEV_ORG_ID=...       # organization id
 export NEEV_PROJECT_ID=...   # project id
 ```
 
+New to NeevCloud? Create an API key and find your organization and project ids
+by following [Retrieve organization and project IDs](https://docs.ai.neevcloud.com/tutorials/create-your-first-sandbox-in-neevcloud-agentic-studio-javascript-sdk#step-3-retrieve-organization-and-project-ids)
+in the Agentic Studio quickstart.
+
 Then run a task:
 
 ```sh
@@ -154,6 +158,14 @@ config, so restate what you need):
   and `NEEV_*` names are always stripped, and the sandbox keeps its own base
   environment (a base-image variable cannot be unset through the spawn env).
 - **PTY working directory and environment** follow the sandbox defaults.
+
+## Resources
+
+- [Create your first sandbox (Agentic Studio, JS SDK)](https://docs.ai.neevcloud.com/tutorials/create-your-first-sandbox-in-neevcloud-agentic-studio-javascript-sdk) — get an API key and your org/project IDs
+- [Sandbox Runtime API reference](https://docs.ai.neevcloud.com/api-reference/sandbox-runtime) — the sandbox APIs this bundle builds on
+- [AI Agent API reference](https://docs.ai.neevcloud.com/api-reference/ai-agent) — the agent platform APIs
+- [`@neevcloud/sdk`](https://www.npmjs.com/package/@neevcloud/sdk) — the JavaScript SDK the providers use
+- [DeepSeek Harness capability seams](https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/capability-seams.md) — the `ctx.subprocess` / `ctx.fs` model this plugs into
 
 ## Develop
 

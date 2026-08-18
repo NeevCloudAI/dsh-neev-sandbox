@@ -1,76 +1,56 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 470" width="1200" height="470" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" role="img" aria-label="NeevSandbox for DeepSeek Harness — run your agent's shell, PTY, and LSP inside a remote sandbox">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 440" width="1200" height="440" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" role="img" aria-label="NeevSandbox for DeepSeek Harness — run your agent's Bash, PTY and LSP in an isolated gVisor sandbox">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0b1220"/>
-      <stop offset="1" stop-color="#131e36"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d1110"/>
+      <stop offset="1" stop-color="#080a09"/>
     </linearGradient>
-    <linearGradient id="dsh" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#4f46e5"/>
-      <stop offset="1" stop-color="#4338ca"/>
+    <radialGradient id="glowTL" cx="14%" cy="8%" r="55%">
+      <stop offset="0" stop-color="#10b981" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowBR" cx="82%" cy="86%" r="55%">
+      <stop offset="0" stop-color="#0d9488" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#0d9488" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="titleg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f2f7f5"/>
+      <stop offset="1" stop-color="#34d399"/>
     </linearGradient>
-    <linearGradient id="mid" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#7c3aed"/>
-      <stop offset="1" stop-color="#6d28d9"/>
-    </linearGradient>
-    <linearGradient id="box" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#0d9488"/>
-      <stop offset="1" stop-color="#0f766e"/>
-    </linearGradient>
-    <linearGradient id="seam" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#818cf8"/>
-      <stop offset="1" stop-color="#2dd4bf"/>
-    </linearGradient>
+    <filter id="termshadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
   </defs>
 
-  <rect x="0" y="0" width="1200" height="470" rx="24" fill="url(#bg)"/>
-  <rect x="0.5" y="0.5" width="1199" height="469" rx="24" fill="none" stroke="#1e293b" stroke-width="1"/>
+  <rect x="0" y="0" width="1200" height="440" rx="20" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1200" height="440" rx="20" fill="url(#glowTL)"/>
+  <rect x="0" y="0" width="1200" height="440" rx="20" fill="url(#glowBR)"/>
+  <rect x="0.5" y="0.5" width="1199" height="439" rx="20" fill="none" stroke="#1b2420"/>
 
-  <!-- header -->
-  <text x="60" y="82" fill="#f8fafc" font-size="40" font-weight="700">NeevSandbox <tspan fill="#94a3b8" font-weight="500">for</tspan> DeepSeek Harness</text>
-  <text x="60" y="120" fill="#94a3b8" font-size="20">Run your agent's Bash, PTY, and LSP inside a remote sandbox — no Harness fork.</text>
+  <!-- typography -->
+  <text x="80" y="150" font-size="14" letter-spacing="6" fill="#34d399" font-weight="600">NEEVCLOUD × DEEPSEEK HARNESS</text>
+  <text x="76" y="232" font-size="76" font-weight="800" letter-spacing="1" fill="url(#titleg)">NeevSandbox</text>
+  <text x="80" y="278" font-size="24" fill="#d5e0db" font-weight="500">Run every command <tspan fill="#34d399" font-weight="700">isolated by gVisor.</tspan></text>
+  <text x="80" y="311" font-size="16.5" fill="#8ba398">Bash, PTY, and LSP run in a disposable sandbox — nothing on your host.</text>
+  <line x1="80" y1="384" x2="150" y2="384" stroke="#2f8f6b" stroke-width="1.5"/>
+  <text x="164" y="389" font-size="14" letter-spacing="5" fill="#5aa588" font-weight="600">INTO THE SANDBOX</text>
 
-  <!-- chips -->
-  <g font-size="13" fill="#cbd5e1">
-    <rect x="60" y="140" width="118" height="26" rx="13" fill="#1e293b"/><text x="119" y="157" text-anchor="middle">TypeScript · ESM</text>
-    <rect x="188" y="140" width="96" height="26" rx="13" fill="#1e293b"/><text x="236" y="157" text-anchor="middle">Node ≥ 22</text>
-    <rect x="294" y="140" width="150" height="26" rx="13" fill="#1e293b"/><text x="369" y="157" text-anchor="middle">installable dsh bundle</text>
-    <rect x="454" y="140" width="64" height="26" rx="13" fill="#1e293b"/><text x="486" y="157" text-anchor="middle">MIT</text>
+  <!-- terminal window -->
+  <g filter="url(#termshadow)">
+    <rect x="748" y="96" width="388" height="248" rx="14" fill="#0a0f0d" stroke="#20302a"/>
+    <rect x="748" y="96" width="388" height="38" rx="14" fill="#111917"/>
+    <rect x="748" y="120" width="388" height="14" fill="#111917"/>
+    <circle cx="772" cy="115" r="5.5" fill="#f87171"/>
+    <circle cx="792" cy="115" r="5.5" fill="#fbbf24"/>
+    <circle cx="812" cy="115" r="5.5" fill="#34d399"/>
+    <text x="1120" y="120" text-anchor="end" font-size="12" fill="#5b6b64" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">dsh · headless</text>
   </g>
-
-  <!-- flow -->
-  <g>
-    <!-- DSH -->
-    <rect x="60" y="250" width="320" height="150" rx="16" fill="url(#dsh)"/>
-    <text x="220" y="298" text-anchor="middle" fill="#eef2ff" font-size="22" font-weight="700">DeepSeek Harness</text>
-    <text x="220" y="330" text-anchor="middle" fill="#c7d2fe" font-size="15">the agent + its tools</text>
-    <g font-size="13" fill="#312e81">
-      <rect x="96" y="350" width="66" height="26" rx="13" fill="#c7d2fe"/><text x="129" y="367" text-anchor="middle">Bash</text>
-      <rect x="170" y="350" width="60" height="26" rx="13" fill="#c7d2fe"/><text x="200" y="367" text-anchor="middle">PTY</text>
-      <rect x="238" y="350" width="60" height="26" rx="13" fill="#c7d2fe"/><text x="268" y="367" text-anchor="middle">LSP</text>
-    </g>
-
-    <!-- seam arrow 1 -->
-    <text x="440" y="312" text-anchor="middle" fill="#a5b4fc" font-size="14" font-weight="600">ctx.subprocess</text>
-    <path d="M384 325 H496" stroke="url(#seam)" stroke-width="3" fill="none"/>
-    <polygon points="496,319 510,325 496,331" fill="#2dd4bf"/>
-
-    <!-- provider -->
-    <rect x="514" y="250" width="320" height="150" rx="16" fill="url(#mid)"/>
-    <text x="674" y="298" text-anchor="middle" fill="#f5f3ff" font-size="20" font-weight="700">@neevcloud/dsh-sandbox</text>
-    <text x="674" y="330" text-anchor="middle" fill="#ddd6fe" font-size="15">runtime + subprocess providers</text>
-    <text x="674" y="360" text-anchor="middle" fill="#c4b5fd" font-size="13">this package · one cordis.patch.yml</text>
-
-    <!-- seam arrow 2 -->
-    <text x="894" y="312" text-anchor="middle" fill="#5eead4" font-size="14" font-weight="600">@neevcloud/sdk</text>
-    <path d="M838 325 H950" stroke="url(#seam)" stroke-width="3" fill="none"/>
-    <polygon points="950,319 964,325 950,331" fill="#2dd4bf"/>
-
-    <!-- sandbox -->
-    <rect x="968" y="250" width="172" height="150" rx="16" fill="url(#box)"/>
-    <text x="1054" y="300" text-anchor="middle" fill="#ecfdf5" font-size="20" font-weight="700">NeevSandbox</text>
-    <text x="1054" y="330" text-anchor="middle" fill="#99f6e4" font-size="14">remote microVM</text>
-    <text x="1054" y="360" text-anchor="middle" fill="#5eead4" font-size="13">your code runs here</text>
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14.5">
+    <text x="770" y="172"><tspan fill="#34d399">agent@sandbox</tspan><tspan fill="#4b5a53">:</tspan><tspan fill="#6ee7b7">~</tspan><tspan fill="#4b5a53">$ </tspan><tspan fill="#e5eeea">whoami</tspan></text>
+    <text x="770" y="196" fill="#a7f3d0">agent</text>
+    <text x="770" y="228"><tspan fill="#34d399">agent@sandbox</tspan><tspan fill="#4b5a53">:</tspan><tspan fill="#6ee7b7">~</tspan><tspan fill="#4b5a53">$ </tspan><tspan fill="#e5eeea">cat /etc/os-release</tspan></text>
+    <text x="770" y="252" fill="#a7f3d0">Ubuntu 26.04 LTS</text>
+    <text x="770" y="300" fill="#5f7a70"># runs in the sandbox, not on your laptop</text>
+    <text x="770" y="324"><tspan fill="#34d399">agent@sandbox</tspan><tspan fill="#4b5a53">:</tspan><tspan fill="#6ee7b7">~</tspan><tspan fill="#4b5a53">$ </tspan></text>
+    <text x="908" y="324" fill="#e5eeea">▋<animate attributeName="opacity" values="1;1;0;0" dur="1.1s" repeatCount="indefinite"/></text>
   </g>
-
-  <text x="60" y="440" fill="#64748b" font-size="14">Swap one provider and Bash, PTY, and LSP all move into the sandbox — the tools are unchanged.</text>
 </svg>

@@ -129,6 +129,8 @@ The runtime module accepts these Cordis config fields (all optional):
 | `templateId` | `sb-ubuntu-26-04-minimal` | Sandbox template the server provisions from |
 | `image` | — | Explicit OCI image; takes precedence over `templateId` |
 | `cwd` | discovered | Absolute working directory; discovered via `pwd` when omitted |
+| `persist` | — | A stable sandbox name. When set, the sandbox is reused across runs (reconnected by name) and paused instead of deleted on exit, so its files survive. Omit for the default, fully-ephemeral behavior. |
+| `idleTimeoutMs` | — | Auto-pause the sandbox after this much inactivity to save cost, resuming lazily on the next operation. Omit to never auto-pause. |
 
 The **API key is read only from `NEEV_API_KEY`** — it is never a config field,
 so a secret can never end up in a committed profile patch, and it is never
@@ -184,9 +186,10 @@ the agent writes with its file tools is visible to Bash, and vice versa.
 the SDK only; it is never passed into the sandbox, and credential-shaped
 environment names are stripped from anything forwarded to a process.
 
-**Is the sandbox persistent?** Not in this release — it's created on profile
-boot and deleted when `dsh` exits. Reconnect, pause/resume, and snapshots are on
-the roadmap.
+**Is the sandbox persistent?** By default it's created on boot and deleted on
+exit. Set `persist` to a stable name and the sandbox is reconnected across runs
+(paused on exit, resumed on the next run) with its files intact; set
+`idleTimeoutMs` to auto-pause it while idle to save cost.
 
 **Which model does it use?** Any model provider DeepSeek Harness is configured
 with; the plugin only provides the execution world, not the model.

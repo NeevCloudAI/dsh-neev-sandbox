@@ -76,9 +76,12 @@ export class NeevSubprocessHandle implements SubprocessHandle {
 
   /** Start the process, drain its follow stream, and resolve exit facts. */
   private async run(): Promise<SubprocessOutcome> {
-    const sandbox = await this.neev.getSandbox()
-    this.sandbox = sandbox
+    // Hold the sandbox awake for the whole run so an idle auto-pause cannot
+    // freeze the follow stream mid-process and stall the awaited outcome.
+    const release = this.neev.hold()
     try {
+      const sandbox = await this.neev.getSandbox()
+      this.sandbox = sandbox
       const started = await sandbox.processes.start([...this.spec.argv], {
         cwd: toWorkspaceRelative(this.spec.cwd, this.neev.cwd),
         env: buildChildEnv(this.spec.env),
@@ -95,7 +98,9 @@ export class NeevSubprocessHandle implements SubprocessHandle {
       return { exitCode, signal: null }
     } finally {
       // Settle every resource on any exit path (normal, throw, or abort) so a
-      // consumer draining a piped stream to EOF never hangs.
+      // consumer draining a piped stream to EOF never hangs, and release the
+      // sandbox hold so idle auto-pause can proceed.
+      release()
       this.exited = true
       this.clearTimers()
       this.stdoutPipe?.end()

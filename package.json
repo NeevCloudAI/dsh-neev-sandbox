@@ -1,6 +1,6 @@
 {
   "name": "@neevcloud/dsh-sandbox",
-  "version": "0.2.0",
+  "version": "0.1.2",
   "description": "NeevSandbox execution providers for DeepSeek Harness",
   "license": "Apache-2.0",
   "type": "module",

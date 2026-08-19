@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0
+## 0.1.2
 
 - Persistent sandbox (opt-in). A new `persist` config reuses one sandbox across
   runs — reconnected by name, paused instead of deleted on exit — so its files

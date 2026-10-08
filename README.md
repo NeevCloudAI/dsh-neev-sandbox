@@ -131,6 +131,7 @@ The runtime module accepts these Cordis config fields (all optional):
 | `cwd` | discovered | Absolute working directory; discovered via `pwd` when omitted |
 | `persist` | — | A stable sandbox name. When set, the sandbox is reused across runs (reconnected by name) and paused instead of deleted on exit, so its files survive. Omit for the default, fully-ephemeral behavior. |
 | `idleTimeoutMs` | — | Auto-pause the sandbox after this much inactivity to save cost, resuming lazily on the next operation. Omit to never auto-pause. |
+| `orphanTimeoutSeconds` | `900` | Backstop for a harness that exits without cleaning up (crash, kill). The runtime sends a keepalive heartbeat while it runs; after this many seconds without one, the server pauses the sandbox, and an ephemeral one is deleted after a day paused. If the host sleeps past the window, the next operation resumes the sandbox. `0` turns the backstop off: the sandbox then has no server idle limit, so a crashed harness leaves it running. |
 
 The **API key is read only from `NEEV_API_KEY`** — it is never a config field,
 so a secret can never end up in a committed profile patch, and it is never
@@ -189,7 +190,12 @@ environment names are stripped from anything forwarded to a process.
 **Is the sandbox persistent?** By default it's created on boot and deleted on
 exit. Set `persist` to a stable name and the sandbox is reconnected across runs
 (paused on exit, resumed on the next run) with its files intact; set
-`idleTimeoutMs` to auto-pause it while idle to save cost.
+`idleTimeoutMs` to auto-pause it while idle to save cost. If a reconnected
+sandbox restarted with an empty filesystem, the runtime warns on stderr.
+
+**What if the harness crashes?** The sandbox is not left running. Without the
+runtime's heartbeat, the server pauses it after `orphanTimeoutSeconds`, and an
+ephemeral sandbox is deleted a day later.
 
 **Which model does it use?** Any model provider DeepSeek Harness is configured
 with; the plugin only provides the execution world, not the model.

@@ -72,7 +72,7 @@
     "prepack": "tsdown"
   },
   "dependencies": {
-    "@neevcloud/sdk": "0.7.0-beta",
+    "@neevcloud/sdk": "0.8.2",
     "ws": "^8.21.3"
   },
   "peerDependencies": {

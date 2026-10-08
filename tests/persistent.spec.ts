@@ -52,6 +52,37 @@ describe.skipIf(!LIVE)('persistent sandbox', () => {
     await fiber.dispose()
   })
 
+  it('creates the sandbox with the server-side orphan backstop', async () => {
+    const ctx = new Context()
+    const fiber = await ctx.plugin(NeevRuntime, { templateId: TEST_TEMPLATE_ID, orphanTimeoutSeconds: 600 })
+    const sandbox = await ctx.neev.getSandbox()
+    createdIds.push(sandbox.id)
+    const live = await neevFromEnv().sandboxes.get(sandbox.id)
+    expect(live.data.idle_timeout_seconds).toBe(600)
+    expect(live.data.on_idle).toBe('pause')
+    expect(live.data.paused_retention_seconds).toBe(86_400)
+    await fiber.dispose()
+  })
+
+  it('resumes a sandbox paused behind its back once the heartbeat goes stale', async () => {
+    const ctx = new Context()
+    const fiber = await ctx.plugin(NeevRuntime, { templateId: TEST_TEMPLATE_ID, orphanTimeoutSeconds: 3 })
+    const sandbox = await ctx.neev.getSandbox()
+    createdIds.push(sandbox.id)
+
+    // Pause through a separate client, as the server would after a missed heartbeat.
+    const other = await neevFromEnv().sandboxes.get(sandbox.id)
+    await other.pause()
+    while (other.phase !== 'Paused') { await new Promise(r => setTimeout(r, 500)); await other.refresh() }
+    // Give the 1s heartbeat a tick to notice the pause.
+    await new Promise(r => setTimeout(r, 2500))
+
+    const resumed = await ctx.neev.getSandbox()
+    expect(resumed.phase).toBe('Ready')
+    expect((await resumed.exec(['true'])).exitCode).toBe(0)
+    await fiber.dispose()
+  })
+
   it('keeps the sandbox awake while a process is live', async () => {
     const ctx = new Context()
     const rt = await ctx.plugin(NeevRuntime, { templateId: TEST_TEMPLATE_ID, idleTimeoutMs: 2000 })

@@ -10,13 +10,19 @@ import { posix } from 'node:path'
 import { Context, Service } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { WebSocket } from 'ws'
-import { Neev } from '@neevcloud/sdk'
-import type { CreateSandboxParams, Sandbox, SandboxWebSocket } from '@neevcloud/sdk'
+import { Neev, NotFoundError } from '@neevcloud/sdk'
+import type { CreateSandboxParams, Sandbox, SandboxLifecycle, SandboxWebSocket } from '@neevcloud/sdk'
 
 export type { Sandbox } from '@neevcloud/sdk'
 
 /** Default template when neither templateId nor image is configured. */
 const DEFAULT_TEMPLATE_ID = 'sb-ubuntu-26-04-minimal'
+
+/** Default server-side orphan window, in seconds. */
+const DEFAULT_ORPHAN_TIMEOUT_SECONDS = 900
+
+/** How long the server keeps an orphaned ephemeral sandbox paused before deleting it. */
+const EPHEMERAL_PAUSED_RETENTION_SECONDS = 86_400
 
 /**
  * Configuration for the shared NeevSandbox owner. The API key is intentionally
@@ -46,6 +52,14 @@ export interface Config {
    * resume it lazily on the next operation. Omit to never auto-pause.
    */
   idleTimeoutMs?: number
+  /**
+   * Server-side backstop for a harness that dies without cleaning up. While the
+   * runtime is alive it sends a keepalive heartbeat; once the heartbeat stops
+   * for this many seconds the server pauses the sandbox, and an ephemeral one
+   * is deleted after a day paused. Defaults to 900. 0 turns the backstop off:
+   * the sandbox gets no server idle limit, so a crashed harness leaves it running.
+   */
+  orphanTimeoutSeconds?: number
 }
 
 declare module '@deepseek-ai/cordis' {
@@ -68,6 +82,7 @@ export class NeevRuntime extends Service {
     cwd: z.string(),
     persist: z.string(),
     idleTimeoutMs: z.number(),
+    orphanTimeoutSeconds: z.number(),
   })
 
   /** Absolute in-sandbox workspace root shared by provider adapters. */
@@ -85,6 +100,11 @@ export class NeevRuntime extends Service {
   // Count of in-flight operations that must keep the sandbox awake.
   private active = 0
   private idleTimer: ReturnType<typeof setTimeout> | undefined
+  // Periodic keepalive that holds off the server-side orphan backstop.
+  private heartbeat: ReturnType<typeof setInterval> | undefined
+  private heartbeatMs = 0
+  // When the last heartbeat ran; a stale value means the host slept through it.
+  private lastBeat = 0
   // An in-flight idle pause, so getSandbox/teardown can serialize with it.
   private pausePromise: Promise<void> | undefined
 
@@ -121,6 +141,8 @@ export class NeevRuntime extends Service {
     // Let any in-flight idle pause settle before deciding whether to resume, so
     // a hold that arrived mid-pause doesn't run against a pausing sandbox.
     if (this.pausePromise !== undefined) await this.pausePromise.catch(() => undefined)
+    // After missed heartbeats the cached phase is stale; beat now to learn it.
+    if (this.heartbeatMs > 0 && Date.now() - this.lastBeat > 2 * this.heartbeatMs) await this.beat(sandbox)
     // Resume whenever the sandbox is paused — by our idle timer or out of band
     // (e.g. another session sharing the persist name) — using the real phase.
     if (this.paused || sandbox.phase === 'Paused') {
@@ -155,10 +177,13 @@ export class NeevRuntime extends Service {
     let sandbox: Sandbox
     let reused = false
     if (persist !== undefined) {
-      const existingId = await this.findByName(persist)
-      if (existingId !== undefined) {
-        sandbox = await this.client.sandboxes.get(existingId)
+      const existing = await this.findByName(persist)
+      if (existing !== undefined) {
+        sandbox = existing
         reused = true
+        this.warnIfStorageReset(sandbox)
+        // Bring the reused sandbox's windows in line with this run's config.
+        await sandbox.updateTimeout(this.lifecycle()).catch(() => undefined)
       } else {
         sandbox = await this.client.sandboxes.create(this.createParams(persist))
       }
@@ -177,6 +202,7 @@ export class NeevRuntime extends Service {
       this.ctx.logger.info('NeevSandbox %s: %s (cwd %s)', verb, sandbox.id, this.cwd)
       process.stderr.write(`NeevSandbox ${verb}: ${sandbox.id}\n`)
       this.scheduleIdle()
+      this.startHeartbeat(sandbox)
       return sandbox
     } catch (error: unknown) {
       // Only delete a sandbox we just created; never delete a reused one.
@@ -233,17 +259,41 @@ export class NeevRuntime extends Service {
   }
 
   /**
-   * Find a reusable sandbox by persist name, skipping unrecoverable ones. Pages
-   * through the whole listing so a persisted sandbox beyond the first page is
-   * still found rather than silently re-created (which would orphan its files).
+   * Find a reusable sandbox by persist name; an unrecoverable one counts as
+   * absent so a fresh sandbox is created in its place.
    */
-  private async findByName(name: string): Promise<string | undefined> {
-    for (let page = 1; ; page += 1) {
-      const res = await this.client.sandboxes.list({ page, limit: 100 })
-      const match = res.items.find(s => s.name === name && s.phase !== 'RestoreFailed')
-      if (match !== undefined) return match.id
-      if (res.items.length < 100 || page * 100 >= res.total) return undefined
+  private async findByName(name: string): Promise<Sandbox | undefined> {
+    try {
+      const sandbox = await this.client.sandboxes.get(name)
+      return sandbox.phase === 'RestoreFailed' ? undefined : sandbox
+    } catch (error: unknown) {
+      if (error instanceof NotFoundError) return undefined
+      throw error
     }
+  }
+
+  /** Warn when a reconnected sandbox restarted with an empty filesystem. */
+  private warnIfStorageReset(sandbox: Sandbox): void {
+    const crash = sandbox.lastCrash
+    if (crash === null || !crash.storage_reset) return
+    this.ctx.logger.warn('NeevSandbox %s restarted with an empty filesystem at %s (%s); persisted files are gone', sandbox.id, crash.at, crash.reason)
+    process.stderr.write(`NeevSandbox ${sandbox.id}: storage was reset at ${crash.at}; persisted files are gone\n`)
+  }
+
+  /**
+   * The server-side orphan backstop: pause once the heartbeat has been silent
+   * for the window. Pausing (not deleting) means a heartbeat lost to host sleep
+   * costs a resume, not the workspace; an ephemeral sandbox is then deleted
+   * after a day paused, while a persisted one keeps the account's retention.
+   * When the backstop is off the idle limit is sent as 0, since omitting it
+   * would apply the account's default idle pause with no heartbeat to hold it off.
+   */
+  private lifecycle(): SandboxLifecycle {
+    const seconds = this.config.orphanTimeoutSeconds ?? DEFAULT_ORPHAN_TIMEOUT_SECONDS
+    if (seconds <= 0) return { idle_timeout_seconds: 0 }
+    const lifecycle: SandboxLifecycle = { idle_timeout_seconds: seconds, on_idle: 'pause' }
+    if (this.config.persist === undefined) lifecycle.paused_retention_seconds = EPHEMERAL_PAUSED_RETENTION_SECONDS
+    return lifecycle
   }
 
   /** Build the create request, tagging it with the persist name when set. */
@@ -251,7 +301,36 @@ export class NeevRuntime extends Service {
     const base = this.config.image !== undefined && this.config.image !== ''
       ? { image: this.config.image }
       : { sandbox_template_id: this.config.templateId ?? DEFAULT_TEMPLATE_ID }
-    return (name !== undefined ? { ...base, name } : base) as CreateSandboxParams
+    return { ...base, ...(name !== undefined ? { name } : {}), lifecycle: this.lifecycle() } as CreateSandboxParams
+  }
+
+  /**
+   * Send a keepalive three times per orphan window so the server only reclaims
+   * the sandbox once this process is gone. Skipped while paused, since a paused
+   * sandbox is not subject to the idle window.
+   */
+  private startHeartbeat(sandbox: Sandbox): void {
+    const seconds = this.lifecycle().idle_timeout_seconds ?? 0
+    if (seconds <= 0) return
+    this.heartbeatMs = (seconds * 1000) / 3
+    this.lastBeat = Date.now()
+    this.heartbeat = setInterval(() => { void this.beat(sandbox) }, this.heartbeatMs)
+    this.heartbeat.unref?.()
+  }
+
+  /**
+   * One heartbeat. If the server paused the sandbox anyway (the host slept past
+   * the window), record it so the next getSandbox() resumes before use.
+   */
+  private async beat(sandbox: Sandbox): Promise<void> {
+    if (this.disposed || this.paused || this.pausePromise !== undefined) return
+    this.lastBeat = Date.now()
+    try {
+      await sandbox.keepalive()
+    } catch {
+      await sandbox.refresh().catch(() => undefined)
+    }
+    if (sandbox.phase === 'Paused' && this.pausePromise === undefined) this.paused = true
   }
 
   /** Record activity and (re)arm the idle-pause timer. */
@@ -312,6 +391,7 @@ export class NeevRuntime extends Service {
   private readonly teardown = async (): Promise<void> => {
     this.disposed = true
     if (this.idleTimer !== undefined) clearTimeout(this.idleTimer)
+    if (this.heartbeat !== undefined) clearInterval(this.heartbeat)
     let sandbox: Sandbox
     try {
       sandbox = await this.ready
